@@ -85,7 +85,7 @@ const char* sscan(Node* curr, const char* buffer)
     while(!CHECK())
     {
         curr->length += 1;
-        curr->val = (char*)realloc(curr->val, curr->length);
+        curr->val = (char*)realloc(curr->val, curr->length + 1);
         if (curr->val == NULL) return NULL;
 
         //printf("%c ", *buffer);
