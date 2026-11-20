@@ -53,7 +53,13 @@ int Akinator(Node* root, const char* filename)
     else 
     {
         ASK(printf("Congrats, you beat me! Do you want to add your character?\n[y/n]\n"));
-        if (buffer[0] == 'n') return FINISH_GAME;
+        if (buffer[0] == 'n')
+        {
+            ASK(printf("Play one more?\n[y/n]\n"));
+
+            if (buffer[0] == 'y') return PLAY_AGAIN;
+            else return FINISH_GAME;
+        }
 
         else
         {
