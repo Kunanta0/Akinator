@@ -1,6 +1,12 @@
 #ifndef STRINGTREE_H_INCLUDED
 #define STRINGTREE_H_INCLUDED
 
+#include <windows.h>
+
+#define GREEN "\033[32m"
+#define RED "\033[91m"
+#define RESET "\033[0m"
+
 #define CHECK() (*buffer == '(' || *buffer == ')')
 
 #define LEFT_BRACKET()\
@@ -52,14 +58,55 @@ Node* CreateStringNode(Node* parent, char* val);
 Node* PreorderStringConvert(const char* buffer);
 void string_tree_print(Node* tree, FILE* fstream);
 void string_tree_destroy(Node* tree);
-void PrintStringLeaves(Node* tree);
+void PrintStringLeaves(Node* tree, FILE** dictionary);
 void TreePrintDot(Node* root, const char* filename);
 void string_tree_print(Node* node, FILE* stream);
-const char* sscan(Node* tree, const char* buffer);
+void GetPath(Node* root, const char* val);
+const char* sscan(Node* node, const char* buffer);
 
 //universal
 char* GetBuffer(const char* filename);
 Node* CreateLeave(Node* newnode, Node* parent);
+
+void GetPath(Node* node, const char* val)
+{
+    if (node == NULL) return;
+
+    if (node->left == NULL && node->right == NULL)
+    {
+        if (strcmp(node->val, val) == 0)
+        {
+            printf(GREEN "%s" RESET " ", val);
+            while (node->parent != NULL)
+            {
+                if (node == node->parent->left) printf("is %s", node->parent->val);
+                else printf("isn't %s", node->parent->val);
+                node = node->parent;
+                if (node->parent != NULL) printf(", ");
+            }
+            printf("\n");
+
+            return;
+        }
+    }
+
+    GetPath(node->left, val);
+    GetPath(node->right, val);
+}
+
+void PrintStringLeaves(Node *node, FILE** dictionary) 
+{
+    if (node == NULL) return;
+
+    if (node->left == NULL && node->right == NULL) 
+    {
+        fprintf(*dictionary, "%s\n", node->val);
+        return;
+    }
+
+    PrintStringLeaves(node->left, dictionary);
+    PrintStringLeaves(node->right, dictionary);
+}
 
 Node* CreateLeave(Node* newnode, Node* parent)
 {
@@ -109,7 +156,7 @@ Node* PreorderStringConvert(const char* buffer)
     {
         //printf("%s\n", buffer);
         buffer = sscan(curr, buffer);
-        printf("%s\n", curr->val);
+        //printf("%s\n", curr->val);
         
         RIGHT_BRACKET();
         LEFT_BRACKET();
@@ -169,7 +216,6 @@ static void print_tree_recursive(FILE* dump, Node* node, int is_root)
 
     int current_id = g_node_id++;
 
-    /* Определяем тип узла: корень / лист / внутренний */
     const char* fillcolor;
     if (is_root)
         fillcolor = "orange";
@@ -218,9 +264,9 @@ void TreePrintDot(Node* root, const char* filename)
     fprintf(dump, " nodesep=0.5;\n");
     fprintf(dump, " ranksep=1.0;\n");
     fprintf(dump, " node [fontname=\"Helvetica\"];\n");
-    fprintf(dump, " edge [fontname=\"Helvetica\", fontsize=10];\n");   /* шрифт подписей */
+    fprintf(dump, " edge [fontname=\"Helvetica\", fontsize=10];\n");
 
-    print_tree_recursive(dump, root, 1);   /* root помечаем как корень */
+    print_tree_recursive(dump, root, 1);   
 
     fprintf(dump, "}\n");
     fclose(dump);
